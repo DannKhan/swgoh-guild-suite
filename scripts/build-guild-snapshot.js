@@ -1,6 +1,33 @@
-import { buildGuildSnapshot } from "../src/snapshot-builder/builder.js";
+import fs from "fs/promises";
 
-const snapshot = await buildGuildSnapshot("743985967");
+import { buildGuildSnapshot } 
+from "../src/snapshot-builder/builder.js";
 
-console.log("Guild:", snapshot.guild.profile.name);
-console.log("Members:", snapshot.guild.member.length);
+
+const config =
+    JSON.parse(
+        await fs.readFile(
+            "./config/tracked-guilds.json",
+            "utf8"
+        )
+    );
+
+
+for (const guild of config.guilds) {
+
+    const snapshot =
+        await buildGuildSnapshot(guild.allyCode);
+
+
+    await fs.writeFile(
+        `./docs/data/snapshots/${guild.name}.json`,
+        JSON.stringify(snapshot, null, 2)
+    );
+
+
+    console.log(
+        "Updated:",
+        guild.name
+    );
+
+}
